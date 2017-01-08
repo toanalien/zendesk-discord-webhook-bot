@@ -44,7 +44,7 @@ print(lza)
 pickle.dump(lza,open('lza.p','wb'))
 
 def get_gravatar(email):
-    default = "https://resonantrise.zendesk.com/images/favicon_2.ico"
+    default = "https://{}.zendesk.com/images/favicon_2.ico".format(creds['subdomain'])
     avatar = "https://www.gravatar.com/avatar/" + hashlib.md5(email.encode("utf8").lower()).hexdigest() + "?"
     avatar += urllib.parse.urlencode({'d':default})
     return avatar
