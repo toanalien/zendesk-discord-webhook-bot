@@ -155,7 +155,7 @@ def post_webhook(event):
                if r.headers['X-RateLimit-Remaining'] == 0:
                    now = int(time.time())
                    then = int(r.headers['X-RateLimit-Reset'])
-                   ttw = then - now
+                   ttw = then - now # ttw = Time To Wait
                    if ttw > 0:
                        print("Hit Rate Limit, sleeping for {}".format(str(ttw)))
                        time.sleep(ttw)
