@@ -37,6 +37,7 @@ tickets = {}
 if os.path.isfile('lza.p') is True: # lza = Last Zendesk Audit
     lza = pickle.load(open('lza.p','rb'))
 else:
+    first_run = True
     lza = datetime.datetime.utcnow()
 
 print(lza)
@@ -66,7 +67,7 @@ def post_webhook(event):
         else:
             avatar = get_gravatar(requester.email)
 
-        wh = Webhook(url, "---\n", "", "")
+        wh = Webhook(url, "", "", "")
 
         at = Attachment(
             author_name = '{} ({})'.format(requester.name,requester.email),
@@ -80,10 +81,13 @@ def post_webhook(event):
         for child in event._child_events:
            if child['event_type'] == 'Create':
                if first_run is True:
-                   wh = Webhook(url, "---\n", "", "")
+                   wh = Webhook(url, "", "", "")
                else:
                    wh = Webhook(url, "@here, New Ticket!", "", "")
-               field = Field("New Ticket", ticket.description, False)
+               description = ticket.description
+               while "\n\n" in description:
+                   description = description.replace("\n\n", "\n")
+               field = Field("Description", ticket.description, False)
                at.addField(field)
                wh.addAttachment(at)
                wh.post()
@@ -108,6 +112,9 @@ def post_webhook(event):
            if child['event_type'] == 'Comment':
                for comment in zenpy.tickets.comments(ticket.id).values:
                     if comment['id'] == child['id']:
+                        comment_body = comment['plain_body']
+                        while "\n\n" in comment_body:
+                            comment_body = comment_body.replace("\n\n","\n")
                         field = Field("New Comment", comment['plain_body'], False)
                         at.addField(field)
            elif child['event_type'] == 'Change':
@@ -154,7 +161,7 @@ def post_webhook(event):
                        time.sleep(ttw)
                else:
                    break
-           sleep(1)
+           time.sleep(1)
 
     except Exception as e:
         if "RecordNotFound" in str(e):
@@ -162,12 +169,9 @@ def post_webhook(event):
         else:
             traceback.print_exc()
 
-#first_run = True
-#
-#for event in zenpy.tickets.events("2016-01-01T00:00:00Z"):
-#    post_webhook(event)
-
-first_run = False
+if first_run is True:
+    for event in zenpy.tickets.events("1970-01-01T00:00:00Z"):
+        post_webhook(event)
 
 while True:
     for event in zenpy.tickets.events(lza):
