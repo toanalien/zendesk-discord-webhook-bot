@@ -1,5 +1,5 @@
 # zendesk-discord-webhook-bot
-[WIP] Discord Webhook Bot for Zendesk
+Discord Webhook Bot for Zendesk
 
 ![](https://i.cwlf.uk/evKB)
 
